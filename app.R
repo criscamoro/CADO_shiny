@@ -6,6 +6,9 @@ library(shinydashboard)
 library(tidyverse)
 library(vtable)
 library(DT)
+library(shinyWidgets)
+library(ggtext)
+library(vegan)
 
 amb.tidy <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/ambiental_tidy.csv')
 amb.rect <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/rectangulares/ambiental_rect.csv')
@@ -31,17 +34,36 @@ sb.menu <- dashboardSidebar(
 
 #Cuadros de resumen estadístico
 cr.input <- box(fluidRow(
-  column(6, selectInput('año', 'Año:', c('Todos', unique(as.character(amb.tidy$año))))),
-  column(6, selectInput('mes', 'Mes:', c('Todos', sort(unique(as.integer(amb.tidy$mes))))))),
+  column(4, selectInput('año', 'Año:', c('Todos', unique(as.character(amb.tidy$año))))),
+  column(4, selectInput('mes', 'Mes:', c('Todos', sort(unique(as.integer(amb.tidy$mes)))))),
+  column(4, downloadButton('downloadData', 'Descargar'))),
   width = 12)
 
 cr.output <- box(DT::dataTableOutput('cuadro', width = '100%'), width = 12)
+
+# Series temporales
+st.input <- box(fluidRow(
+  column(9, selectizeInput('vars', 'Parámetros', choices = unique(as.character(amb.rect$idParametro)), 
+                           multiple = T, options = list(plugins = list('remove_button')))),
+  column(3, checkboxInput('stm', label = 'Estandarizar datos*'))), width = 8)
+
+st.input2 <- box(fluidRow(
+  column(12, airDatepickerInput('rango', label = 'Periodo', range = T, language = 'es', 
+                           value = c(min(amb.tidy$fecha), max(amb.tidy$fecha)), 
+                           minDate = min(amb.tidy$fecha), maxDate = max(amb.tidy$fecha),
+                           view = 'months', minView = 'months', 
+                           dateFormat = 'yyyy/MM', separator = '-'))), width = 4)
+
+st.output <- fluidRow(box(
+  plotOutput('st.plot'), width = 12))
+
+st.stm <- box(width = 12, '*Si se selecciona, los datos serán reescalados a una media de 0 y desviación estándar de 1')
 
 # Contenido
 sb.body <- dashboardBody(
   tabItems(
     tabItem(tabName = 'inicio', box(includeMarkdown('C:/Users/ccopi/Desktop/PP/Caji/README.md'), width = 12)),
-    tabItem(tabName = 'chapala', 'Datos de Chapala'),
+    tabItem(tabName = 'chapala', fluidRow(st.input, st.input2), st.output, fluidRow(st.stm)),
     tabItem(tabName = 'caji', fluidRow(cr.input), fluidRow(cr.output)),
     tabItem(tabName = 'zapo', 'Datos de la Laguna de Zapotlán'),
     tabItem(tabName = 'santi', 'Datos del Río Santiago'),
@@ -56,6 +78,7 @@ ui <- dashboardPage(
 
 #### Server ####
 server <- function(input, output) {
+  # Cuadros de resumen estadístico
   output$cuadro <- DT::renderDataTable(DT::datatable({
     data <- amb.tidy
     if (input$año != 'Todos') {
@@ -69,6 +92,42 @@ server <- function(input, output) {
                summ.names = list(c('N', 'Media', 'D.E.', 'Min', 'Max', 'C.V.')),
                out = 'return')
   }, options = list(dom = 't', pageLength = 45)))
+  
+  output$downloadData <- downloadHandler(
+    filename = function(){
+      paste('summary',input$año, '_', input$mes, '.csv', sep = '')
+    },
+    content = function(file){
+      write.csv(data, file, row.names = F)
+    }
+  )
+  # Gráficos de series temporales
+  col.vec <- reactive({
+    col.vec <- if (length(input$vars) == 0) {scales::hue_pal()(1)
+    } else {
+      scales::hue_pal()(sum(lengths(input$vars)))
+      }
+    })
+
+  output$st.plot <- renderPlot({
+    ggplot(data = if(input$stm == T) {
+      amb.tidy %>% 
+        mutate(across(Temperatura:Clorofilas,
+                      ~decostand(., method = 'standardize', na.rm = T))) %>% 
+        filter(fecha < max(input$rango) & fecha > min(input$rango))
+      } else {
+        amb.tidy %>% 
+          filter(fecha < max(input$rango) & fecha > min(input$rango))
+        }, 
+      aes(x = fecha)) +
+      lapply(input$vars, function(x){
+        geom_line(aes(y = .data[[x]], color = x))
+        }) +
+      scale_color_manual(name = 'Parámetro', values = col.vec()) + 
+      labs(title = if(length(input$rango) > 5){'Múltiples parámteros'} else {paste(input$vars, collapse = ', ')},
+           x = 'fecha', y = 'valor') +
+      theme_classic() + 
+      theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), 'pt')))})
 }
 
 shinyApp(ui = ui, server = server)
