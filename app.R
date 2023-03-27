@@ -10,8 +10,8 @@ library(shinyWidgets)
 library(ggtext)
 library(vegan)
 
-amb.tidy <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/ambiental_tidy.csv')
-amb.rect <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/rectangulares/ambiental_rect.csv')
+amb.tidy <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/ambiental_tidy.csv') ### pendiente
+amb.rect <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/rectangulares/ambiental_rect.csv') ### pendiente
 
 cv <- function(x) {
   c.v <- (sd(x, na.rm = T)/mean(x, na.rm = T)*100)
@@ -57,7 +57,11 @@ st.input2 <- box(fluidRow(
 st.output <- fluidRow(box(
   plotOutput('st.plot'), width = 12))
 
-st.stm <- box(width = 12, '*Si se selecciona, los datos serán reescalados a una media de 0 y desviación estándar de 1')
+st.stm <- box(width = 12, 
+              '*Si se selecciona, los datos serán reescalados a una media de 0 y desviación estándar de 1')
+
+# Página de Inicio (Parámetros ambientales monitoreo)
+#Temperatura, OD, pH, Dureza, Clorofila, Nitrógeno total, Coliformes, Profundidad
 
 # Contenido
 sb.body <- dashboardBody(
@@ -78,6 +82,11 @@ ui <- dashboardPage(
 
 #### Server ####
 server <- function(input, output) {
+  # Función de coeficiente de variación
+  cv <- function(x) {
+    c.v <- (sd(x, na.rm = T)/mean(x, na.rm = T)*100)
+  }
+  
   # Cuadros de resumen estadístico
   output$cuadro <- DT::renderDataTable(DT::datatable({
     data <- amb.tidy
@@ -94,11 +103,9 @@ server <- function(input, output) {
   }, options = list(dom = 't', pageLength = 45)))
   
   output$downloadData <- downloadHandler(
-    filename = function(){
-      paste('summary',input$año, '_', input$mes, '.csv', sep = '')
-    },
+    filename = paste('summary',input$año, '_', input$mes, '.csv', sep = ''),
     content = function(file){
-      write.csv(data, file, row.names = F)
+      write.csv(x = , paste(file), row.names = F)
     }
   )
   # Gráficos de series temporales
@@ -124,7 +131,8 @@ server <- function(input, output) {
         geom_line(aes(y = .data[[x]], color = x))
         }) +
       scale_color_manual(name = 'Parámetro', values = col.vec()) + 
-      labs(title = if(length(input$rango) > 5){'Múltiples parámteros'} else {paste(input$vars, collapse = ', ')},
+      labs(title = if(length(input$rango) > 5){'Múltiples parámteros'
+        } else {paste(input$vars, collapse = ', ')},
            x = 'fecha', y = 'valor') +
       theme_classic() + 
       theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), 'pt')))})
