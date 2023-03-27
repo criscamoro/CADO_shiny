@@ -13,12 +13,7 @@ library(vegan)
 amb.tidy <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/ambiental_tidy.csv') ### pendiente
 amb.rect <- read_csv('C:/Users/ccopi/Desktop/PP/Caji/datos/rectangulares/ambiental_rect.csv') ### pendiente
 
-cv <- function(x) {
-  c.v <- (sd(x, na.rm = T)/mean(x, na.rm = T)*100)
-}
-
 #### Definir interfaz gráfica ####
-
 # Interfaz de la barra lateral
 sb.menu <- dashboardSidebar(
   sidebarMenu(
@@ -30,13 +25,14 @@ sb.menu <- dashboardSidebar(
              menuSubItem('Río Santiago', tabName = 'santi'),
              menuSubItem('Río Zula - Lerma', tabName = 'lerma'),
              menuSubItem('Río Verde', tabName = 'verde')),
+    menuItem('Acerca de', tabName = 'about', icon = icon('circle-question')),
     menuItem('Contancto', tabName = 'contacto', icon = icon('envelope'))))
 
 #Cuadros de resumen estadístico
 cr.input <- box(fluidRow(
   column(4, selectInput('año', 'Año:', c('Todos', unique(as.character(amb.tidy$año))))),
   column(4, selectInput('mes', 'Mes:', c('Todos', sort(unique(as.integer(amb.tidy$mes)))))),
-  column(4, downloadButton('downloadData', 'Descargar'))),
+  column(4, downloadButton('dl.cre', 'Descargar'))),
   width = 12)
 
 cr.output <- box(DT::dataTableOutput('cuadro', width = '100%'), width = 12)
@@ -44,15 +40,16 @@ cr.output <- box(DT::dataTableOutput('cuadro', width = '100%'), width = 12)
 # Series temporales
 st.input <- box(fluidRow(
   column(9, selectizeInput('vars', 'Parámetros', choices = unique(as.character(amb.rect$idParametro)), 
-                           multiple = T, options = list(plugins = list('remove_button')))),
+                           multiple = T, options = list(plugins = list('remove_button')))), 
   column(3, checkboxInput('stm', label = 'Estandarizar datos*'))), width = 8)
 
 st.input2 <- box(fluidRow(
-  column(12, airDatepickerInput('rango', label = 'Periodo', range = T, language = 'es', 
+  column(6, airDatepickerInput('rango', label = 'Periodo', range = T, language = 'es', 
                            value = c(min(amb.tidy$fecha), max(amb.tidy$fecha)), 
                            minDate = min(amb.tidy$fecha), maxDate = max(amb.tidy$fecha),
                            view = 'months', minView = 'months', 
-                           dateFormat = 'yyyy/MM', separator = '-'))), width = 4)
+                           dateFormat = 'yyyy/MM', separator = '-')), 
+  column(6, downloadButton('dl.gst', 'Descargar'))), width = 4)
 
 st.output <- fluidRow(box(
   plotOutput('st.plot'), width = 12))
@@ -63,7 +60,7 @@ st.stm <- box(width = 12,
 # Página de Inicio (Parámetros ambientales monitoreo)
 #Temperatura, OD, pH, Dureza, Clorofila, Nitrógeno total, Coliformes, Profundidad
 
-# Contenido
+#### Contenido ####
 sb.body <- dashboardBody(
   tabItems(
     tabItem(tabName = 'inicio', box(includeMarkdown('C:/Users/ccopi/Desktop/PP/Caji/README.md'), width = 12)),
@@ -73,6 +70,7 @@ sb.body <- dashboardBody(
     tabItem(tabName = 'santi', 'Datos del Río Santiago'),
     tabItem(tabName = 'lerma', 'Datos del Río Zula - Lerma'),
     tabItem(tabName = 'verde', 'Datos del Río Verde'),
+    tabItem(tabName = 'about', box(includeMarkdown('C:/Users/ccopi/Desktop/PP/Caji/README.md'), width = 12)),
     tabItem(tabName = 'contacto', 'cristofer.camarena@alumnos.udg.mx')))
 
 ui <- dashboardPage(
@@ -82,13 +80,11 @@ ui <- dashboardPage(
 
 #### Server ####
 server <- function(input, output) {
-  # Función de coeficiente de variación
-  cv <- function(x) {
-    c.v <- (sd(x, na.rm = T)/mean(x, na.rm = T)*100)
-  }
+  
+  # Cargar datos
   
   # Cuadros de resumen estadístico
-  output$cuadro <- DT::renderDataTable(DT::datatable({
+  amb.tidy.cre <- reactive({
     data <- amb.tidy
     if (input$año != 'Todos') {
       data <- data[data$año == input$año,]
@@ -97,15 +93,22 @@ server <- function(input, output) {
       data <- data[data$mes == input$mes,]
     }
     data <- st(data %>% select(1:45), 
-               summ = list(c('notNA(x)', 'mean(x)', 'sd(x)', 'min(x)', 'max(x)', 'cv(x)')),
+               summ = list(c('notNA(x)', 'mean(x)', 'sd(x)', 'min(x)',
+                             'max(x)', '(sd(x, na.rm = T)/mean(x, na.rm = T)*100)')),
                summ.names = list(c('N', 'Media', 'D.E.', 'Min', 'Max', 'C.V.')),
                out = 'return')
+  }) 
+  
+  output$cuadro <- DT::renderDataTable(DT::datatable({
+    amb.tidy.cre()
   }, options = list(dom = 't', pageLength = 45)))
   
-  output$downloadData <- downloadHandler(
-    filename = paste('summary',input$año, '_', input$mes, '.csv', sep = ''),
+  output$dl.cre <- downloadHandler(
+    filename = function () {
+      paste('resumen', '_', input$año, '_', input$mes, '.csv', sep = '')
+      },
     content = function(file){
-      write.csv(x = , paste(file), row.names = F)
+      write.csv(amb.tidy.cre(), file, row.names = F)
     }
   )
   # Gráficos de series temporales
@@ -115,27 +118,41 @@ server <- function(input, output) {
       scales::hue_pal()(sum(lengths(input$vars)))
       }
     })
-
-  output$st.plot <- renderPlot({
+  
+  amb.tidy.gst <- reactive({
     ggplot(data = if(input$stm == T) {
       amb.tidy %>% 
         mutate(across(Temperatura:Clorofilas,
                       ~decostand(., method = 'standardize', na.rm = T))) %>% 
         filter(fecha < max(input$rango) & fecha > min(input$rango))
-      } else {
-        amb.tidy %>% 
-          filter(fecha < max(input$rango) & fecha > min(input$rango))
-        }, 
-      aes(x = fecha)) +
+    } else {
+      amb.tidy %>% 
+        filter(fecha < max(input$rango) & fecha > min(input$rango))
+    }, 
+    aes(x = fecha)) +
       lapply(input$vars, function(x){
         geom_line(aes(y = .data[[x]], color = x))
-        }) +
+      }) +
       scale_color_manual(name = 'Parámetro', values = col.vec()) + 
-      labs(title = if(length(input$rango) > 5){'Múltiples parámteros'
-        } else {paste(input$vars, collapse = ', ')},
+      labs(title = paste(input$vars, collapse = ', '),
            x = 'fecha', y = 'valor') +
       theme_classic() + 
-      theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), 'pt')))})
+      theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), 'pt')))
+  })
+
+  output$st.plot <- renderPlot({
+    amb.tidy.gst()
+    })
+  
+  output$dl.gst <- downloadHandler(
+    filename = function(){
+      paste(input$vars, '_', input$rango, '.png')
+    },
+    content = function(file){
+      ggsave(file, plot = amb.tidy.gst(), 
+             width = 1920, height = 1080, units = 'px', pointsize = 12, bg = 'white',dpi = 300)
+    }
+  )
 }
 
 shinyApp(ui = ui, server = server)
