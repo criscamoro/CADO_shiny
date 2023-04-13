@@ -1,21 +1,4 @@
 #Función para generar los cuadros de resumen estadísticos
-id.data <- function(x) {
-  if(x == 'caji') {
-    return(caji.amb.tidy)
-  }
-  if(x == 'lerma') {
-    return(lerma.amb.tidy)
-  }
-  if(x == 'zapo') {
-    return(zapo.amb.tidy)
-  }
-  if(x == 'verde') {
-    return(verde.amb.tidy)
-  }
-  if(x == 'santi') {
-    return(santi.amb.tidy)
-  }
-}
 
 cre <- reactive({
   data <- id.data(first(first(str_split(input$tabs, '_'))))

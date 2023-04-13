@@ -1,11 +1,15 @@
 # Función para cargar datos
+library(tidyverse)
+library(openxlsx)
+library(qdap)
+library(lubridate)
 
-# Descargar datos directo de la CEA Jalisco
-caji <- 'https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaCajititlan.xlsx'
-lerma <- 'https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioZula-Lerma.xlsx'
-zapo <- 'https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaZapotlan.xlsx'
-verde <- 'https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioVerde.xlsx'
-santi <- 'https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioSantiago.xlsx'
+# Descargar datos directo de la CEA Jalisco #### OBSOLETO
+caji <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaCajititlan.xlsx', 'Laguna de Cajititlán')
+lerma <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioZula-Lerma.xlsx', 'Río Zula-Lerma')
+zapo <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaZapotlan.xlsx', 'Laguna Zapotlán')
+verde <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioVerde.xlsx', 'Río Verde')
+santi <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioSantiago.xlsx', 'Río Santiago')
 
 url <- tibble(caji, lerma, zapo, verde, santi)
 
@@ -25,11 +29,16 @@ xl.sheet <- function(x,i){
              sheet = nth(excel_sheets((paste('datos/crudos/',last(last(str_split(x, '/'))), sep = ''))), -i))
 }
 
+xl.import <- function(x) {
+  sheet <- read.xlsx(x[1], sheet = x[2])
+}
+
 # Función para procesar los datos
 data.process <- function(j) {
   datos.amb <- xl.sheet(j, 3) %>% 
-    select(-1) %>%
-    slice(-n()) %>% 
+    filter(!is.na(fecha)) %>%
+    filter(!between(idMuestra, 112361, 112610)) %>% 
+    select(-1) %>% 
     mutate(valor = as.character(gsub('<', '', valor))) %>% 
     mutate(valor = as.numeric(gsub('-', '', valor))) %>%
     mutate(idParametro = as.character(idParametro)) %>% 
@@ -43,7 +52,6 @@ data.process <- function(j) {
     relocate(est, .after = mes) %>% 
     relocate(fecha, .before = año)
 }
-
 
 # Datos de la Laguna de Cajititlán (Requieren de pasos extra de limpieza)
 caji.amb.rect <- xl.sheet(caji, 3) %>%
@@ -66,8 +74,10 @@ caji.amb.tidy <<- caji.amb.rect %>%
   relocate(est, .after = mes) %>% 
   relocate(fecha, .before = año)
 
-csv <- function(x) {
-  write.csv(data.process(x), paste('datos/crudos/', x, '_amb_tidy.csv', sep = ''), row.names = F, na = '')
+csv <- function(x, i) {
+  write.csv(data.process(x), paste('datos/tidy/', i, '_amb_tidy.csv', sep = ''), row.names = F, na = '')
 }
 
-lapply(csv, url)
+
+
+# lapply(csv, url)

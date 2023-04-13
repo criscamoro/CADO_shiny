@@ -73,6 +73,7 @@ server <- function(input, output) {
              width = 1920, height = 1080, units = 'px', pointsize = 12, bg = 'white',dpi = 300)
     }
   )
+  
   lerma.amb.tidy.cre <- reactive({
     data1 <- lerma.amb.tidy
     if (input$lerma.año != 'Todos') {

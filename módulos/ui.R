@@ -53,7 +53,7 @@ sb.body <- dashboardBody(
     tabItem(tabName = 'caji_cre', fluidRow(cre.input), fluidRow(cre.output)),
     tabItem(tabName = 'caji_gst', fluidRow(gst.input, gst.input2), gst.output, fluidRow(gst.stm)),
     tabItem(tabName = 'zapo_cre', box(uiOutput('a'))),
-    tabItem(tabName = 'zapo_gst', 'Datos de la Laguna de Zapotlán 2'),
+    tabItem(tabName = 'zapo_gst', box(uiOutput('a'))),
     tabItem(tabName = 'santi_cre', 'Datos del Río Santiago'),
     tabItem(tabName = 'santi_gst', 'Datos del Río Santiago 2'),
     tabItem(tabName = 'lerma_cre', fluidRow(lerma.cre.input), fluidRow(lerma.cre.output)),
