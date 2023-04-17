@@ -1,5 +1,6 @@
 # Módulo para visualización de Gráficas de Series Temporales
 
+# UI ----
 gst_UI <- function(id, dataset) {
   ns <- NS(id)
   
@@ -44,6 +45,7 @@ gst_UI <- function(id, dataset) {
     )
 }
 
+# Server ----
 gst_server <- function(id, dataset) {
   moduleServer(
     id,

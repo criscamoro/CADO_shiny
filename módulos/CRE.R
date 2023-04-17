@@ -1,5 +1,6 @@
-#Módulo para visualización de Cuadros de Resumen Estadístico
+# Módulo para visualización de Cuadros de Resumen Estadístico
 
+# UI ----
 cre_UI <- function(id, dataset) {
   ns <- NS(id)
   
@@ -31,6 +32,7 @@ cre_UI <- function(id, dataset) {
     )
 }
 
+# Server ----
 cre_server <- function(id, dataset) {
   moduleServer(
     id,

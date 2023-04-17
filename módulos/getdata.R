@@ -1,17 +1,13 @@
+# Obtener y limpiar datos de la Comisión Estatal del Agua Jalisco
 
-library(tidyverse)
-library(openxlsx)
-library(qdap)
-library(lubridate)
-
-# Argumentos para la función
+# Argumentos para la función ----
 caji <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaCajititlan.xlsx', 'Laguna de Cajititlán', 'Puntos de Muestreo')
 lerma <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioZula-Lerma.xlsx', 'Río Zula-Lerma', 'Puntos de Muestro')
 zapo <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaZapotlan.xlsx', 'Laguna Zapotlán', 'Puntos de Muestreo')
 verde <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioVerde.xlsx', 'Río Verde', 'Puntos de Muestreo')
 santi <- c('https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioSantiago.xlsx', 'Río Santiago', 'Puntos de Muestro')
 
-# Función para procesar los datos
+# Función para procesar los datos ----
 data_process <- function(x) {
   datos_amb <- as_tibble(read.xlsx(x[1], sheet = x[2], detectDates = T)) %>%
     mutate(idMuestra = as.numeric(idMuestra)) %>%
@@ -46,7 +42,7 @@ data_process <- function(x) {
   assign(paste(deparse(substitute(x)), 'amb_tidy', sep = '_'), datos_amb, .GlobalEnv)
 }
 
-# Cargar datos en el Global Enviroment
+# Cargar datos en el Global Enviroment ----
 
 data_process(caji)
 data_process(lerma)
