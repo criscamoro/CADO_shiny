@@ -17,7 +17,8 @@ library(vegan)
 
 # Módulos ---- 
 
-source('módulos/getdata.R')
+#source('módulos/get_data.R')
+source('módulos/get_data2.R')
 source('módulos/CRE.R')
 source('módulos/GST.R')
 
