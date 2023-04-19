@@ -36,9 +36,9 @@ sb_menu <- dashboardSidebar(
     menuItem("Inicio", tabName = "inicio", icon = icon("house")),
     sb_ca("Laguna de Cajititlán", "caji"),
     sb_ca("Laguna de Zapotlán", "zapo"),
-    sb_ca("Río Santiago", "santi"),
-    sb_ca("Río Zula - Lerma", "lerma"),
     sb_ca("Río Verde", "verde"),
+    sb_ca("Río Zula - Lerma", "lerma"),
+    sb_ca("Río Santiago", "santi"),
     menuItem("Acerca de", tabName = "about", icon = icon("circle-question")),
     menuItem("Contacto", tabName = "contacto", icon = icon("envelope"))
   )
@@ -51,12 +51,12 @@ sb_body <- dashboardBody(
     tabItem(tabName = "caji_gst", gst_UI("caji_gst", caji_amb_tidy)),
     tabItem(tabName = "zapo_cre", cre_UI("zapo_cre", zapo_amb_tidy)),
     tabItem(tabName = "zapo_gst", gst_UI("zapo_gst", zapo_amb_tidy)),
-    tabItem(tabName = "santi_cre", cre_UI("santi_cre", santi_amb_tidy)),
-    tabItem(tabName = "santi_gst", gst_UI("santi_gst", santi_amb_tidy)),
-    tabItem(tabName = "lerma_cre", cre_UI("lerma_cre", lerma_amb_tidy)),
-    tabItem(tabName = "lerma_gst", gst_UI("lerma_gst", lerma_amb_tidy)),
     tabItem(tabName = "verde_cre", cre_UI("verde_cre", verde_amb_tidy)),
     tabItem(tabName = "verde_gst", gst_UI("verde_gst", verde_amb_tidy)),
+    tabItem(tabName = "lerma_cre", cre_UI("lerma_cre", lerma_amb_tidy)),
+    tabItem(tabName = "lerma_gst", gst_UI("lerma_gst", lerma_amb_tidy)),
+    tabItem(tabName = "santi_cre", cre_UI("santi_cre", santi_amb_tidy)),
+    tabItem(tabName = "santi_gst", gst_UI("santi_gst", santi_amb_tidy)),
     tabItem(tabName = "about", box(includeMarkdown("www/README.md"), width = 12)),
     tabItem(tabName = "contacto", "cristofer.camarena@alumnos.udg.mx")
   )
@@ -71,15 +71,15 @@ UI <- dashboardPage(
 # Server ----
 server <- function(input, output, session) {
   cre_server("caji_cre", caji_amb_tidy)
-  cre_server("lerma_cre", lerma_amb_tidy)
   cre_server("zapo_cre", zapo_amb_tidy)
   cre_server("verde_cre", verde_amb_tidy)
+  cre_server("lerma_cre", lerma_amb_tidy)
   cre_server("santi_cre", santi_amb_tidy)
 
   gst_server("caji_gst", caji_amb_tidy)
-  gst_server("lerma_gst", lerma_amb_tidy)
   gst_server("zapo_gst", zapo_amb_tidy)
   gst_server("verde_gst", verde_amb_tidy)
+  gst_server("lerma_gst", lerma_amb_tidy)
   gst_server("santi_gst", santi_amb_tidy)
 }
 

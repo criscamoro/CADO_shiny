@@ -2,9 +2,9 @@
 
 # Argumentos para la función ----
 caji <- c("https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaCajititlan.xlsx", "Laguna de Cajititlán", "Puntos de Muestreo")
-lerma <- c("https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioZula-Lerma.xlsx", "Río Zula-Lerma", "Puntos de Muestro")
 zapo <- c("https://www.ceajalisco.gob.mx/contenido/datos_abiertos/LagunaZapotlan.xlsx", "Laguna Zapotlán", "Puntos de Muestreo")
 verde <- c("https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioVerde.xlsx", "Río Verde", "Puntos de Muestreo")
+lerma <- c("https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioZula-Lerma.xlsx", "Río Zula-Lerma", "Puntos de Muestro")
 santi <- c("https://www.ceajalisco.gob.mx/contenido/datos_abiertos/RioSantiago.xlsx", "Río Santiago", "Puntos de Muestro")
 
 # Función para procesar los datos ----
@@ -51,7 +51,7 @@ data_process <- function(x) {
 # Cargar datos en el Global Enviroment ----
 
 data_process(caji)
-data_process(lerma)
 data_process(zapo)
 data_process(verde)
+data_process(lerma)
 data_process(santi)
