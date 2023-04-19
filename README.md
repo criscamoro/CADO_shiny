@@ -1,7 +1,7 @@
 Aplicación para la visualización de datos de cuerpos de agua dulce del occidente de Jalisco
 ================
 
-## Descripción
+## Acerca de
 
 Esta aplicación está diseñada para visualizar los datos ambientales y biológicos de cuerpos 
 de agua dulce del estado de Jalisco, proporcionados por el **Laboratorio de Ecosistemas Marinos 
