@@ -1,5 +1,4 @@
-# Obtener datos de repositorio Github
-# Prueba local
+# Obtener datos del repositorio Github https://github.com/criscamoro/CADO
 
 # Argumentos para la función ----
 
@@ -12,12 +11,10 @@ nom <- c(
 ) 
 
 # Función para leer datos
-# 'readRDS' será sustituida por una función que permita leer directamente del repositorio
-
 datos <- function(n) {
   assign(
     paste(n, "_amb_tidy", sep = ""),
-    readRDS(paste("C:/Users/ccopi/Desktop/PP/Caji/datos/tidy/", n, "_amb_tidy.rds", sep = "")),
+    read_csv(paste("https://raw.githubusercontent.com/criscamoro/CADO/main/datos/tidy/", n, "_amb_tidy.csv", sep = "")),
     .GlobalEnv
   )
 }
