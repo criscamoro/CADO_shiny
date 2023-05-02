@@ -1,4 +1,4 @@
-# Módulo para visualización de Cuadros de Resumen Estadístico
+# Módulo para visualización de Cuadros de Resumen Estadístico (cre)
 
 # UI ----
 cre_UI <- function(id, dataset) {

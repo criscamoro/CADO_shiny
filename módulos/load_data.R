@@ -1,7 +1,6 @@
 # Obtener datos del repositorio Github https://github.com/criscamoro/CADO
 
 # Argumentos para la función ----
-
 nom <- c(
   "caji", # Laguna de Cajititlán
   "zapo", # Laguna de Zapotlán
@@ -10,7 +9,7 @@ nom <- c(
   "santi" # Río Santiago
 ) 
 
-# Función para leer datos
+# Función para leer datos ----
 datos <- function(n) {
   assign(
     paste(n, "_amb_tidy", sep = ""),
@@ -20,3 +19,10 @@ datos <- function(n) {
 }
 
 lapply(nom, datos)
+
+# Leer datos de fitoplancton ----
+assign(
+  "caji_fito_rect",
+  read.csv("https://raw.githubusercontent.com/criscamoro/CADO/main/datos/rectangulares/caji_fito_rect.csv"),
+  .GlobalEnv
+)

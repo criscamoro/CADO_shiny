@@ -1,7 +1,6 @@
 # Aplicación de visualización de datos del Programa de Monitoreo de Cuerpos de Agua Dulce de Occidente (CAO)
 
 # Paquetes ----
-
 library(shiny)
 library(shinythemes)
 library(shinydashboard)
@@ -14,12 +13,13 @@ library(DT)
 library(shinyWidgets)
 library(ggtext)
 library(vegan)
+library(treemapify)
 
 # Módulos ----
-
 source("módulos/load_data.R")
-source("módulos/CRE.R")
-source("módulos/GST.R")
+source("módulos/cuadros.R")
+source("módulos/series_temp.R")
+source("módulos/fito.R")
 
 # UI ----
 sb_ca <- function(nombre, id) {
@@ -33,7 +33,11 @@ sb_ca <- function(nombre, id) {
 sb_menu <- dashboardSidebar(
   sidebarMenu(
     menuItem("Inicio", tabName = "inicio", icon = icon("house")),
-    sb_ca("Laguna de Cajititlán", "caji"),
+    menuItem("Laguna de Cajititlán", 
+      tabName = "caji", icon = icon("water"),
+      menuSubItem("Cuadros de resumen", tabName = "caji_cre"),
+      menuSubItem("Gráficas", tabName = "caji_gst"),
+      menuSubItem("Fitoplancton", tabName = "caji_fito")),
     sb_ca("Laguna de Zapotlán", "zapo"),
     sb_ca("Río Verde", "verde"),
     sb_ca("Río Zula - Lerma", "lerma"),
@@ -48,6 +52,7 @@ sb_body <- dashboardBody(
     tabItem(tabName = "inicio", box(includeMarkdown("www/README.md"), width = 12)),
     tabItem(tabName = "caji_cre", cre_UI("caji_cre", caji_amb_tidy)),
     tabItem(tabName = "caji_gst", gst_UI("caji_gst", caji_amb_tidy)),
+    tabItem(tabName = "caji_fito", fito_UI("caji_fito", caji_fito_rect)),
     tabItem(tabName = "zapo_cre", cre_UI("zapo_cre", zapo_amb_tidy)),
     tabItem(tabName = "zapo_gst", gst_UI("zapo_gst", zapo_amb_tidy)),
     tabItem(tabName = "verde_cre", cre_UI("verde_cre", verde_amb_tidy)),
@@ -56,7 +61,7 @@ sb_body <- dashboardBody(
     tabItem(tabName = "lerma_gst", gst_UI("lerma_gst", lerma_amb_tidy)),
     tabItem(tabName = "santi_cre", cre_UI("santi_cre", santi_amb_tidy)),
     tabItem(tabName = "santi_gst", gst_UI("santi_gst", santi_amb_tidy)),
-    tabItem(tabName = "about", "Versión 1.1 (19/04/2023)"),
+    tabItem(tabName = "about", "Versión 1.3 (02/05/2023)"),
     tabItem(tabName = "contacto", "cristofer.camarena@alumnos.udg.mx")
   )
 )
@@ -80,6 +85,8 @@ server <- function(input, output, session) {
   gst_server("verde_gst", verde_amb_tidy)
   gst_server("lerma_gst", lerma_amb_tidy)
   gst_server("santi_gst", santi_amb_tidy)
+  
+  fito_server("caji_fito", caji_fito_rect)
 }
 
 # ShinyApp ----

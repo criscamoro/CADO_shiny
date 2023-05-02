@@ -1,4 +1,4 @@
-# Módulo para visualización de Gráficas de Series Temporales
+# Módulo para visualización de Gráficas de Series Temporales (gst)
 
 # UI ----
 gst_UI <- function(id, dataset) {
