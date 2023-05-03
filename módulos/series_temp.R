@@ -21,12 +21,12 @@ gst_UI <- function(id, dataset) {
         checkboxInput(
           inputId = ns("stm"),
           label = "Estandarizar datos*"
-        )
+        ), bsTooltip(ns("stm"), "Los datos serán reescalados a una media de 0 y desviación estándar de 1")
       )
     ), width = 8),
     box(
       column(
-        6,
+        12,
         airDatepickerInput(
           inputId = ns("rango"),
           label = "Periodo",
@@ -34,24 +34,13 @@ gst_UI <- function(id, dataset) {
           range = T, language = "es", dateFormat = "yyyy/MM", separator = "-", view = "months", minView = "months"
         )
       ),
-      column(
-        6,
-        downloadButton(
-          outputId = ns("desc"),
-          label = "Descargar"
-        )
-      ),
       width = 4
     ),
     box(
-      plotOutput(
+      plotlyOutput(
         outputId = ns("plot")
       ),
       width = 12
-    ),
-    box(
-      width = 12,
-      "*Si se selecciona, los datos serán reescalados a una media de 0 y desviación estándar de 1"
     )
   )
 }
@@ -70,6 +59,7 @@ gst_server <- function(id, dataset) {
       })
 
       gst <- reactive({
+        (
         ggplot(
           data = if (input$stm == T) {
             dataset %>%
@@ -94,9 +84,12 @@ gst_server <- function(id, dataset) {
           ) +
           theme_classic() +
           theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), "pt")))
+        ) %>% 
+          ggplotly() %>% 
+          config(locale = "es")
       })
 
-      output$plot <- renderPlot({
+      output$plot <- renderPlotly({
         gst()
       })
 

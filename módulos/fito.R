@@ -24,19 +24,12 @@ fito_UI <- function(id, dataset) {
       ), width = 8),
     box(
       column(
-        6,
+        12,
         airDatepickerInput(
           inputId = ns("rango"),
           label = "Periodo",
           value = c(min(dataset$fecha), max(dataset$fecha)), minDate = min(dataset$fecha), maxDate = max(dataset$fecha),
           range = T, language = "es", dateFormat = "yyyy/MM", separator = "-", view = "months", minView = "months"
-          )
-        ),
-      column(
-        6,
-        downloadButton(
-          outputId = ns("desc"),
-          label = "Descargar"
           )
         ),
       width = 4
@@ -91,9 +84,9 @@ fito_server <- function(id, dataset) {
                  group_by(.data[[input$nvl]]) %>% 
                  summarise(conteo = sum(conteo)),
                aes(area = conteo, fill = .data[[input$nvl]],
-                   label = paste(.data[[input$nvl]], conteo, sep = "\n"))) +
-          geom_treemap() +
-          geom_treemap_text(color = "white", place = "centre", size = 15)
+                   label = paste(.data[[input$nvl]], "\n", conteo, " cel/ml", sep = ""))) +
+          geom_treemap(layout = "srow") +
+          geom_treemap_text(color = "white", place = "centre", size = 16, layout = "srow")
         })
       
       ab_n <- reactive({
@@ -122,7 +115,7 @@ fito_server <- function(id, dataset) {
           labs(
             title = "Abundancia", 
             x = "Periodo", 
-            y = expression("células・ml"^"-1")) +
+            y = "células/ml") +
           scale_x_discrete(guide = guide_axis(check.overlap = T)) +
           theme_classic() + 
           theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), "pt")))
@@ -190,7 +183,7 @@ fito_server <- function(id, dataset) {
           labs(
             title = "Riqueza de especies",
             x = "Periodo",
-            y = expression("S"["obs"])
+            y = "Sobs"
           ) +
           scale_x_discrete(guide = guide_axis(check.overlap = T)) +
           theme_classic() +
@@ -255,30 +248,28 @@ fito_server <- function(id, dataset) {
               group_by(año, taxa) %>% 
               summarise(conteo = sum(conteo)) %>% 
               group_by(año) %>% 
-              summarise(`H'` = shannon(conteo))
+              summarise(`H'` = shannon(conteo)) %>% 
+              mutate(Periodo = año)
           } else {
             dataset %>% 
               group_by(fecha, taxa) %>% 
               summarise(conteo = sum(conteo)) %>% 
               group_by(fecha) %>% 
               summarise(`H'` = shannon(conteo)) %>% 
-              filter(fecha < max(input$rango) & fecha > min(input$rango))
+              filter(fecha < max(input$rango) & fecha > min(input$rango)) %>% 
+              mutate(Periodo = fecha)
           },
           aes(
-            x = if(input$agr == T) {
-              año
-            } else {
-              fecha
-            },
+            x = Periodo,
             y = `H'`
           )
         ) +
           geom_line(aes(group = 1)) +
-          geom_point() +
+          geom_point(color = "#009933", size = 5) +
           labs(
             title = "Diversidad del fitoplancton de la Laguna de Cajititlán",
             x = "Periodo",
-            y = expression("bits・ind"^"-1")
+            y = "bits/ind"
           ) +
           scale_x_discrete(guide = guide_axis(check.overlap = T)) +
           theme_classic() +

@@ -14,6 +14,8 @@ library(shinyWidgets)
 library(ggtext)
 library(vegan)
 library(treemapify)
+library(plotly)
+library(shinyBS)
 
 # Módulos ----
 source("módulos/load_data.R")
