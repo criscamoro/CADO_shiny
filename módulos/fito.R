@@ -38,13 +38,7 @@ fito_UI <- function(id, dataset) {
       plotOutput(
         outputId = ns("treemap_plot")
         ),
-      width = 7
-      ),
-    box(
-      plotOutput(
-        outputId = ns("shannon_plot")
-        ),
-      width = 5
+      width = 12
       ),
     box(
       plotOutput(
@@ -69,6 +63,18 @@ fito_UI <- function(id, dataset) {
         outputId = ns("sobs_f_plot")
         ),
       width = 6
+      ),
+    box(
+      plotOutput(
+        outputId = ns("shannon_plot")
+        ),
+      width = 6
+      ),
+    box(
+      plotOutput(
+        outputId = ns("pcoa_plot")
+        ),
+      width = 6
       )
     )
 }
@@ -86,7 +92,7 @@ fito_server <- function(id, dataset) {
                aes(area = conteo, fill = .data[[input$nvl]],
                    label = paste(.data[[input$nvl]], "\n", conteo, " cel/ml", sep = ""))) +
           geom_treemap(layout = "srow") +
-          geom_treemap_text(color = "white", place = "centre", size = 16, layout = "srow")
+          geom_treemap_text(color = "white", place = "centre", size = 22, layout = "srow")
         })
       
       ab_n <- reactive({
@@ -111,7 +117,7 @@ fito_server <- function(id, dataset) {
           )
         ) +
           geom_line(aes(group = 1)) +
-          geom_point() +
+          geom_point(color = "#009999", size = 5) +
           labs(
             title = "Abundancia", 
             x = "Periodo", 
@@ -179,7 +185,7 @@ fito_server <- function(id, dataset) {
           )
         ) +
           geom_line(aes(group = 1)) +
-          geom_point() +
+          geom_point(color = "#999900", size = 5) +
           labs(
             title = "Riqueza de especies",
             x = "Periodo",
@@ -235,6 +241,33 @@ fito_server <- function(id, dataset) {
           theme_classic() +
           theme(plot.title = element_textbox_simple(halign = 0.5, margin = unit(c(5, 0, 0, 5), "pt")))
       })
+      
+      caji_fito_sqrt2bray <- vegdist(caji_fito_tidy %>% 
+                                       group_by(año) %>% 
+                                       summarise(across(1:61, ~sqrt(sqrt(sum(.))))) %>% 
+                                       select(!c(año)), method = "bray")
+      
+      caji_fito_pcoa <- cmdscale(caji_fito_sqrt2bray, eig = T)
+      
+      pcoa_año_plot <- ggplot(suppressWarnings(as_tibble(caji_fito_pcoa$points)) %>% 
+                                mutate(año = unique(caji_fito_tidy$año)), 
+                              aes(x = V1, y = V2, label = año)) + 
+        geom_point(aes(size = 6, color = "green")) +
+        geom_text(vjust = -0.6) +
+        geom_line(arrow = arrow(length = unit(0.5, "cm"), type = "closed")) +
+        labs(title = "PCoA del fitoplancton de la Laguna de Cajititlán de 2014 a 2019", 
+             x = paste("PCoA 1 (", round(caji_fito_pcoa$eig[1]/sum(caji_fito_pcoa$eig) * 100, digits = 2), "%)", sep = ""), 
+             y = paste("PCoA 2 (", round(caji_fito_pcoa$eig[2]/sum(caji_fito_pcoa$eig) * 100, digits = 2), "%)", sep = "")) +
+        scale_x_reverse() +
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          legend.position = "none", 
+          axis.line = element_line(color = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), 
+          panel.border = element_blank(),
+          panel.background = element_blank()
+        ) 
       
       shannon <- function(x) {
         f <- (x[x > 0]/sum(x))
@@ -294,6 +327,10 @@ fito_server <- function(id, dataset) {
       
       output$sobs_f_plot <- renderPlot({
         sobs_f()
+      })
+      
+      output$pcoa_plot <- renderPlot({
+        pcoa_año_plot
       })
       
       output$shannon_plot <- renderPlot({

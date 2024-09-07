@@ -26,3 +26,9 @@ assign(
   read.csv("https://raw.githubusercontent.com/criscamoro/CADO/main/datos/rectangulares/caji_fito_rect.csv"),
   .GlobalEnv
 )
+
+assign(
+  "caji_fito_tidy",
+  read.csv("https://raw.githubusercontent.com/criscamoro/CADO/main/datos/tidy/caji_fito_tidy.csv"),
+  .GlobalEnv
+)

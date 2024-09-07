@@ -63,7 +63,7 @@ sb_body <- dashboardBody(
     tabItem(tabName = "lerma_gst", gst_UI("lerma_gst", lerma_amb_tidy)),
     tabItem(tabName = "santi_cre", cre_UI("santi_cre", santi_amb_tidy)),
     tabItem(tabName = "santi_gst", gst_UI("santi_gst", santi_amb_tidy)),
-    tabItem(tabName = "about", "Versión 1.3 (02/05/2023)"),
+    tabItem(tabName = "about", "Versión 1.4 (04/05/2023)"),
     tabItem(tabName = "contacto", "cristofer.camarena@alumnos.udg.mx")
   )
 )
