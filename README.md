@@ -1,4 +1,4 @@
-Aplicación para la visualización de datos de cuerpos de agua dulce del occidente de Jalisco
+Aplicación para la visualización de datos de cuerpos de agua dulce del oriente de Jalisco
 ================
 
 ## Acerca de
